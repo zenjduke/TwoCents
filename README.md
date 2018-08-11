@@ -10,14 +10,18 @@ https://dashboard.heroku.com/apps/safe-waters-64599
 
 ## Key Dependencies
 
-request: enables cheerio to get access to front-end code of https://www.nytimes.com/section/world
+```request```: Enables cheerio to get access to HTML content.
 
-cheerio: scrapes front-end code from https://www.nytimes.com/section/world
+```cheerio```: Scrapes HTML content.
 
-mongoose: be in charge of database of NYT Scraper
+```mongoose```: Handles saving articles and notes.
 
-express: builds server-side routes and functions
+```express```: Builds server-side routes and functions.
 
-morgan: logs server-side requests, helping debugging
+```morgan```: Logs server-side requests, aids in debugging.
 
-express-handlebars: a powerful front-end builder without requiring multiple html pages
+```express-handlebars```: A powerful templating engine.
+
+### Author
+
+Zenna Duke
