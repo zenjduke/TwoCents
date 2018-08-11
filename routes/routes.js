@@ -1,7 +1,5 @@
-// Our scraping tools
-// Axios is a promised-based http library, similar to jQuery's Ajax method
-// It works on the client and on the server
-var axios = require("axios");
+// Scraping tools
+var request = require("request");
 var cheerio = require("cheerio");
 
 // Require all models
@@ -54,16 +52,14 @@ module.exports = function(app) {
 	// A GET route for scraping the NYT website
 	app.get("/scrape", function(req, res) {
 		// First, we grab the body of the html with request
-		axios.get("https://www.nytimes.com/section/politics").then(function(response) {
+		request("https://www.nytimes.com/section/politics", function(error, response, html) {
 			// Then, we load that into cheerio and save it to $ for a shorthand selector
-			var $ = cheerio.load(response.data);
-		
+			var $ = cheerio.load(html);
+			var result = {};
+			
 			// Now, we grab every h2 within an article tag, and do the following:
 			$("div.story-body").each(function(i, element) {
-			// Save an empty result object
-			var result = {};
-		
-			// Add the text and href of every link, and save them as properties of the result object
+			
 			var link = $(element).find("a").attr("href");
 			var title = $(element).find("h2.headline").text().trim();
 			var summary = $(element).find("p.summary").text().trim();
