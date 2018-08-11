@@ -41,17 +41,22 @@ textarea {
   width: 25%;
   max-width: 230px;
   float: right;
-  margin: 10px;
+  padding: 10px;
 }
 
 #article-sum {
-  width: 70%;
-  max-width: 650px;
+  width: 75%;
   float: left;
 }
 
 #notes {
   width: 100%;
+}
+
+#save-form {
+  margin: 0;
+  padding: 0;
+  display: inline;
 }
 
 .active-cyan-2 input[type=text]:focus:not([readonly]) {

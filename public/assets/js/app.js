@@ -1,32 +1,16 @@
-// Grab the articles as a json
-$.getJSON("/articles", function(data) {
-  // For each one
-  for (var i = 0; i < 20; i++) {
-    // Display the apropos information on the page
-    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><img src='"+data[i].img+"' id='article-img'><br /><p id='article-sum'>"+data[i].summary+"</p><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='save-article' value='Unsaved'>Save</button></div></div>");
+function changeStatus() {
+	var status = $(this).attr("value");
+	if (status === "Saved") {
+		$(this).html("Unsave");
+	}
+};
 
-    if (data[i].saved === true) {
-      $("#save-article").text("Saved").attr("style","background:#4dd0e1;");
-    };
+function changeBack() {
+	$(this).html($(this).attr("value"));
+};
 
-    $("#articles").append(scrapedArticle);
-    
-  }
-});
+$("#status").hover(changeStatus, changeBack);
 
-// Grab the SAVED articles as a json
-$.getJSON("/articles/saved", function(data) {
-  // For each one
-  for (var i = 0; i < data.length; i++) {
-
-    if (data[i].saved = true) {
-    // Display the apropos information on the page
-    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><img src='"+data[i].img+"' id='article-img'><br /><p id='article-sum'>"+data[i].summary+"</p><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='save-article' value='Unsaved'>Save</button></div></div>");
-
-    $("#myarticles").append(scrapedArticle);
-    }
-  }
-});
 
 // Whenever someone clicks a "Notes" button
 $(document).on("click", ".btn-modal", function() {
@@ -90,53 +74,3 @@ $(document).on("click", "#savenote", function() {
   $("#bodyinput").val("");
 });
 
-// Whenever someone clicks the "Save Article" button
-$(document).on("click", "#save-article", function() {
-  var status = $(this).attr("value");
-  
-  if (status === "Saved") {
-    $(this).text("Unsave").attr("style","background:#4dd0e1;");
-    $(this).attr("value", "Unsaved");
-  }
-  else if (status === "Unsaved") {
-    $(this).text("Save").attr("style","background:#194d53;");
-    $(this).attr("value", "Saved");
-  };
-
-  // Grab the id associated with the article from the submit button
-  var thisId = $(this).attr("data-id");
-
-  // Run a POST request to change the note, using what's entered in the inputs
-  $.ajax({
-    method: "POST",
-    url: "/myarticles/" + thisId,
-    data: {
-      saved: true,
-    }
-  })
-    // With that done
-    .then(function(data) {
-      // Log the response
-      console.log(data);
-    });
-});
-
-// Whenever someone clicks the "Save Article" button
-$(document).on("click", "#del-article", function() {
-    // Grab the id associated with the article from the submit button
-    var thisId = $(this).attr("data-id");
-    // Run a POST request to change the note, using what's entered in the inputs
-    $.ajax({
-      method: "POST",
-      url: "/savedarticles/" + thisId,
-      data: {
-        saved: false,
-      }
-    })
-      // With that done
-      .then(function(data) {
-        // Log the response
-        console.log(data);
-        window.location.reload();
-      });
-  });
