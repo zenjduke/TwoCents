@@ -18,8 +18,11 @@ textarea {
 .btn {
   background: #194d53;
   color: white;
-  border: white;
   margin: 10px;
+}
+
+.btn-primary {
+  border: none;
 }
 
 .card {
@@ -32,6 +35,19 @@ textarea {
   width: 90%;
   height: 90%;
   margin: 15px;
+}
+
+#article-img {
+  width: 25%;
+  max-width: 230px;
+  float: right;
+  margin: 10px;
+}
+
+#article-sum {
+  width: 70%;
+  max-width: 650px;
+  float: left;
 }
 
 #notes {

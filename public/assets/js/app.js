@@ -3,7 +3,11 @@ $.getJSON("/articles", function(data) {
   // For each one
   for (var i = 0; i < 20; i++) {
     // Display the apropos information on the page
-    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><br /><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='save-article'>Save</button></div></div>");
+    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><img src='"+data[i].img+"' id='article-img'><br /><p id='article-sum'>"+data[i].summary+"</p><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='save-article' value='Unsaved'>Save</button></div></div>");
+
+    if (data[i].saved === true) {
+      $("#save-article").text("Saved").attr("style","background:#4dd0e1;");
+    };
 
     $("#articles").append(scrapedArticle);
     
@@ -17,7 +21,7 @@ $.getJSON("/articles/saved", function(data) {
 
     if (data[i].saved = true) {
     // Display the apropos information on the page
-    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><br /><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='del-article'>Delete</button></div></div>");
+    var scrapedArticle = ("<div class='card'><div class='card-body'><h3 class='card-title'>"+ data[i].title + "</h3><img src='"+data[i].img+"' id='article-img'><br /><p id='article-sum'>"+data[i].summary+"</p><a href='"+ data[i].link + "' target='_blank'><button class='btn btn-primary'>Read</button></a><button type='button' class='btn btn-modal btn-primary' data-id='" + data[i]._id + "' data-toggle='modal' data-target='#noteModal'>Notes</button><button type='button' class='btn btn-primary' data-id='" + data[i]._id + "' id='save-article' value='Unsaved'>Save</button></div></div>");
 
     $("#myarticles").append(scrapedArticle);
     }
@@ -40,6 +44,7 @@ $(document).on("click", ".btn-modal", function() {
     .then(function(data) {
       console.log(data);
       // The title of the article
+      $("#note-title").empty();
       $("#note-title").append("<h2>" + data.title + "</h2>");
       // An input to enter a new title
       $("#notes").append("<input id='titleinput' name='title' placeholder='Title'>");
@@ -87,9 +92,20 @@ $(document).on("click", "#savenote", function() {
 
 // Whenever someone clicks the "Save Article" button
 $(document).on("click", "#save-article", function() {
+  var status = $(this).attr("value");
+  
+  if (status === "Saved") {
+    $(this).text("Unsave").attr("style","background:#4dd0e1;");
+    $(this).attr("value", "Unsaved");
+  }
+  else if (status === "Unsaved") {
+    $(this).text("Save").attr("style","background:#194d53;");
+    $(this).attr("value", "Saved");
+  };
+
   // Grab the id associated with the article from the submit button
   var thisId = $(this).attr("data-id");
-  $(this).text("Saved");
+
   // Run a POST request to change the note, using what's entered in the inputs
   $.ajax({
     method: "POST",

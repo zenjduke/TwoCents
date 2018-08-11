@@ -1,41 +1,28 @@
 # TwoCents
 A web app that lets users view and leave comments on the latest news.
 
-Whenever a user runs the app on the local server or on the heroku app link, article headlines, the article link, and the article snippet are scraped from The New York Times' website.
+Create an app that accomplishes the following:
 
-Cheerio is used to easily grab and scrape NYT's DOM elemnts. Mongoose is used to save the scraped data to our database (mongodb.)
+1. Whenever a user visits your site, the app should scrape stories from a news outlet of your choice and display them for the user. Each scraped article should be saved to your application database. At a minimum, the app should scrape and display the following information for each article:
 
-The comments button allows user to view comments on an article or add/delete their own comments; all comments are saved to our mongodb database.
+* Headline - the title of the article
 
-See it live here: #
+* Summary - a short summary of the article
 
-## Prerequisites
+* URL - the url to the original article
 
-Install Node.js. visit https://nodejs.org/en/ and download
-Technologies used
-*node.js *Express.js *Bootstrap V4
+* Feel free to add more content to your database (photos, bylines, and so on).
 
-## Getting Started
+2. Users should also be able to leave comments on the articles displayed and revisit them later. The comments should be saved to the database as well and associated with their articles. Users should also be able to delete comments left on articles. All stored comments should be visible to every user.
 
-This app was made possible using the following npm packages:
+* Beyond these requirements, be creative and have fun with this!
 
-express
-express-handlebars
-body-parser
-cheerio
-mongoose
-morgan
-request
+### Tips
 
-Type npm install in the command line to install all the dependcies located within package.json
+* Go back to Saturday's activities if you need a refresher on how to partner one model with another.
 
-Default test (included in package.json file)
-In order to connect to the scraper web app on the local server, type the following in the command line:
-```
-node server.js
-```
+* Whenever you scrape a site for stories, make sure an article isn't already represented in your database before saving it; we don't want duplicates.
 
-The user will also be notified in the command line interface on which PORT its connected on.
+* Don't just clear out your database and populate it with scraped articles whenever a user accesses your site.
 
-## Author
-Zenna Duke
+* If your app deletes stories every time someone visits, your users won't be able to see any comments except the ones that they post.

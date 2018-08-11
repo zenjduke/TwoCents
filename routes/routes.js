@@ -12,7 +12,7 @@ module.exports = function(app) {
 	app.get("/", function(req, res) {
 		db.Article.find({}, null, {sort: {created: -1}}, function(err, data) {
 			if(data.length === 0) {
-				res.render("placeholder", {message: "There are no articles to view. Please click \"Get New Articles\" for fresh news."});
+				res.render("placeholder", {message: "There are no articles to view. Please click \"Get New Articles\" for current news."});
 			}
 			else{
 				res.render("index", {articles: data});
@@ -21,13 +21,19 @@ module.exports = function(app) {
 	});
 
 	app.get("/myarticles", function(req, res) {
-		db.Article.find({issaved: true}, null, {sort: {created: -1}}, function(err, data) {
+		db.Article.find({saved: true}, null, {sort: {created: -1}}, function(err, data) {
 			if(data.length === 0) {
 				res.render("placeholder", {message: "You have not saved any articles yet."});
 			}
 			else {
 				res.render("saved", {saved: data});
 			}
+		});
+	});
+
+	app.get("/delete", function(req, res) {
+		db.Article.remove({}, function(err, data) {
+			res.render("placeholder", {message: "There are no articles to view. Please click \"Get New Articles\" for fresh news."});
 		});
 	});
 
@@ -48,22 +54,31 @@ module.exports = function(app) {
 	// A GET route for scraping the NYT website
 	app.get("/scrape", function(req, res) {
 		// First, we grab the body of the html with request
-		axios.get("https://www.nytimes.com/").then(function(response) {
+		axios.get("https://www.nytimes.com/section/politics").then(function(response) {
 			// Then, we load that into cheerio and save it to $ for a shorthand selector
 			var $ = cheerio.load(response.data);
 		
 			// Now, we grab every h2 within an article tag, and do the following:
-			$("article h2").each(function(i, element) {
+			$("div.story-body").each(function(i, element) {
 			// Save an empty result object
 			var result = {};
 		
 			// Add the text and href of every link, and save them as properties of the result object
-			result.title = $(this)
-				.children("a")
-				.text();
-			result.link = $(this)
-				.children("a")
-				.attr("href");
+			var link = $(element).find("a").attr("href");
+			var title = $(element).find("h2.headline").text().trim();
+			var summary = $(element).find("p.summary").text().trim();
+			var img = $(element).parent().find("figure.media").find("img").attr("src");
+			result.link = link;
+			result.title = title;
+			if (summary) {
+				result.summary = summary;
+			};
+			if (img) {
+				result.img = img;
+			}
+			else {
+				result.img = $(element).find(".wide-thumb").find("img").attr("src");
+			};
 		
 			// Create a new Article using the `result` object built from scraping
 			db.Article.create(result)
@@ -78,9 +93,9 @@ module.exports = function(app) {
 			});
 		
 			// If we were able to successfully scrape and save an Article, send a message to the client
-			res.send("Scrape Complete");
+			res.redirect('/');
 		});
-		res.render('index');
+	
 	});
 	
 	// Route for getting all Articles from the db
@@ -133,62 +148,20 @@ module.exports = function(app) {
 		});
 	});
 
-	// Route for saving an Article
-	app.post("/myarticles/:id", function(req, res) {
-		// Create a new note and pass the req.body to the entry
-		db.Article.update(
-			{ _id: req.params.id },
-			{ $set:
-				{
-					saved: true
-				}
+	app.post("/save/:id", function(req, res) {
+		Article.findById(req.params.id, function(err, data) {
+			if (data.saved) {
+				Article.findByIdAndUpdate(req.params.id, {$set: {issaved: false, status: "Save"}}, {new: true}, function(err, data) {
+					res.redirect("/");
+				});
 			}
-			)
-			.then(function() {
-			// If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-			// { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-			// Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-			return db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: true });
-			})
-			.then(function(dbArticle) {
-			// If we were able to successfully update an Article, send it back to the client
-			res.json(dbArticle);
-			})
-			.catch(function(err) {
-			// If an error occurred, send it to the client
-			res.json(err);
-			});
-	});
-
-	// Route for deleting a saved Article
-	app.post("/articles/:id", function(req, res) {
-		// Create a new note and pass the req.body to the entry
-		db.Article.update(
-			{ _id: req.params.id },
-			{ $set:
-				{
-					saved: false
-				}
+			else {
+				Article.findByIdAndUpdate(req.params.id, {$set: {issaved: true, status: "Saved"}}, {new: true}, function(err, data) {
+					res.redirect("/saved");
+				});
 			}
-			)
-			.then(function() {
-			// If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-			// { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-			// Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
-			return db.Article.findOneAndUpdate({ _id: req.params.id }, { saved: false });
-			})
-			.then(function(dbArticle) {
-			// If we were able to successfully update an Article, send it back to the client
-			res.json(dbArticle);
-			})
-			.catch(function(err) {
-			// If an error occurred, send it to the client
-			res.json(err);
-			});
+		});
 	});
-
-
-
 
 	// =====================================
 	// 404 Error Page ======================
