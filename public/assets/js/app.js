@@ -1,17 +1,3 @@
-function changeStatus() {
-	var status = $(this).attr("value");
-	if (status === "Saved") {
-		$(this).html("Unsave");
-	}
-};
-
-function changeBack() {
-	$(this).html($(this).attr("value"));
-};
-
-$("#status").hover(changeStatus, changeBack);
-
-
 // Whenever someone clicks a "Notes" button
 $(document).on("click", ".btn-modal", function() {
   // Empty the notes from the note section
@@ -22,7 +8,7 @@ $(document).on("click", ".btn-modal", function() {
   // Now make an ajax call for the Article
   $.ajax({
     method: "GET",
-    url: "/articles/" + thisId
+    url: "/getNotes/" + thisId
   })
     // With that done, add the note information to the page
     .then(function(data) {
@@ -30,17 +16,13 @@ $(document).on("click", ".btn-modal", function() {
       // The title of the article
       $("#note-title").empty();
       $("#note-title").append("<h2>" + data.title + "</h2>");
-      // An input to enter a new title
-      $("#notes").append("<input id='titleinput' name='title' placeholder='Title'>");
-      // A textarea to add a new note body
-      $("#notes").append("<textarea id='bodyinput' name='body' placeholder='Note'></textarea>");
+
       $("#savenote").attr("data-id", data._id);
       // If there's a note in the article
-      if (data.note) {
-        // Place the title of the note in the title input
-        $("#titleinput").val(data.note.title);
-        // Place the body of the note in the body textarea
-        $("#bodyinput").val(data.note.body);
+      if (data.notes) {
+        for (let i = 0; i < data.notes.length; i++) {
+          $("#notes").append("<div class='card' id='currentNotes'><div class='card-body'><div class='card-header' id='noteTitle'>"+data.notes[i].title+"</div><p id='noteBody'> "+data.notes[i].body+"</p><button type='button' class='btn btn-primary btn-sm' id='deleteNote' article-id='"+data._id+"' note-id='"+data.notes[i]._id+"'>DELETE</button></div></div>");
+        }
       }
     });
 });
@@ -65,12 +47,45 @@ $(document).on("click", "#savenote", function() {
     .then(function(data) {
       // Log the response
       console.log(data);
-      // Empty the notes section
-      $("#notes").empty();
     });
 
   // Also, remove the values entered in the input and textarea for note entry
   $("#titleinput").val("");
   $("#bodyinput").val("");
 });
+
+//click event to delete a note from a saved article
+$(document).on('click', '#deleteNote', function (e){
+  e.stopPropagation();
+  let thisItem = $(this);
+  let ids= {
+    noteId: $(this).attr('note-id'),
+    articleId: $(this).attr('article-id')
+  };
+
+  $.ajax({
+    url: '/deleteNote',
+    type: 'POST',
+    data: ids,
+    success: function (response) {
+      console.log(response);
+      thisItem.parent().remove();
+    }
+  });
+});
+
+
+
+// function changeStatus() {
+// 	var status = $(this).attr("value");
+// 	if (status === "Saved") {
+// 		$(this).html("Unsave");
+// 	}
+// };
+
+// function changeBack() {
+// 	$(this).html($(this).attr("value"));
+// };
+
+// $("#status").hover(changeStatus, changeBack);
 

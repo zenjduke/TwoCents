@@ -33,8 +33,10 @@ module.exports = function(app) {
 			var title = $(element).find("h2.headline").text().trim();
 			var summary = $(element).find("p.summary").text().trim();
 			var img = $(element).parent().find("figure.media").find("img").attr("src");
+			var byline = $(element).find('p.byline').text().trim();
 			result.link = link;
 			result.title = title;
+			result.byline = byline;
 			if (summary) {
 				result.summary = summary;
 			};
@@ -118,7 +120,8 @@ module.exports = function(app) {
 			.then(function(dbNote) {
 			// If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
 			// { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-			return db.Article.findOneAndUpdate({ _id: req.params.id }, { note: dbNote._id }, { new: true });
+			return db.Article.findOneAndUpdate({ _id: req.params.id }, {$push:{notes: dbNote._id }}, { new: true });
+
 			})
 			.then(function(dbArticle) {
 			// If we were able to successfully update an Article, send it back to the client
@@ -130,6 +133,7 @@ module.exports = function(app) {
 			});
 	});
 
+	// Post route for saving/unsaving
 	app.post("/save/:id", function(req, res) {
 		db.Article.findById(req.params.id, function(err, data) {
 			if (data.saved) {
@@ -143,6 +147,24 @@ module.exports = function(app) {
 				});
 			}
 		});
+	});
+
+	//get route to retrieve all notes for a particlular article
+	app.get('/getNotes/:id', function (req,res){
+		db.Article
+		.findOne({_id: req.params.id})
+		.populate('notes')
+		.then(results => res.json(results))
+		.catch(err => res.json(err));
+	});
+
+	//Post route to delete a note
+	app.post('/deleteNote', (req,res)=>{
+		let {articleId, noteId} = req.body;
+		db.Note
+		.remove({_id: noteId})
+		.then(result => res.json(result))
+		.catch(err => res.json(err));
 	});
 
 	// =====================================
